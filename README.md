@@ -60,3 +60,15 @@ The application profile auto-saves as you type, including approved answers with 
 **Apply assistant** is the first internship tab. Paste a link and choose Prepare application or Save for later. Supported public metadata is loaded where available; otherwise enter company and role in the form. Save the record, open its application link, and use the extension to review/fill on the employer's form. It cannot universally apply to every site, log in, infer your screening answers, or submit for you.
 
 The technical, behavioral, and OA defaults are transcribed from the provided spreadsheet screenshots (3/2/5 actual rows; template examples excluded). Existing matching company/round entries and profile data are preserved. A stored migration marker ensures the defaults are inserted once and stay deleted after you remove them. Notes are editable; statuses/dates absent in the screenshots remain blank. An old backup is treated as intentional replacement and does not automatically re-add deleted defaults.
+
+## Starting without port-conflict errors
+
+`npm run dev` now uses the PolyPlan launcher. It starts the app on port 5173, or, if a PolyPlan Vite server is already running, prints **http://localhost:5173** and exits successfully. Keep the original server terminal open. Repeatedly running the command does not launch duplicate servers.
+
+To restart the current checkout's server, run:
+
+```sh
+npm run dev:restart
+```
+
+The launcher identifies a server started by this launcher, or uses macOS `lsof` to verify the old Vite process's working directory and command before stopping it. It waits for the port to be released before starting. It does not terminate an unrelated service or force-kill processes. If an unrecognized service owns port 5173, the launcher gives instructions to stop it in its original terminal. It keeps the same port so saved browser data remains at the same origin. Restarting does not clear localStorage.
