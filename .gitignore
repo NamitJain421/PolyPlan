@@ -6,3 +6,8 @@ dist/
 .env.*
 !.env.example
 server-data/
+
+# Personal downloads are never source files.
+polyplan-autofill-private*.json
+polyplan-internships-private*.json
+polyplan-backup*.json

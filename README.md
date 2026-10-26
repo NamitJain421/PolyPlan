@@ -1,51 +1,50 @@
 # PolyPlan
 
-A responsive personal organizer with browser-local storage, editable sample data, custom spaces, calendar and agenda filtering, next actions, in-app reminders, and JSON backups.
+A personal workspace for classes, tasks, and internship applications. Data stays in your browser; no account or backend is required. SMS has been removed.
 
-## Develop
+## Run on your Mac
 
-Requires Node.js 22.13+ (Node 24 LTS recommended).
+Use Node.js 22.12+ (Node 24 LTS recommended). Open the repository folder in VS Code, then run:
 
 ```sh
-npm ci
+npm install
 npm run dev
 ```
 
-## Production
+Open the local address printed by Vite. Keep the terminal running. Use `npm ci` instead of `npm install` for a repeatable clean install. Production: `npm run build`, then deploy the `dist/` folder to a static host; `npm run preview` checks the build locally. Google Fonts is optional and system fonts work offline.
 
-```sh
-npm run build
-npm run preview
-```
+## Planner
 
-Deploy `dist/` to a static website host. No account or external API is required. Google Fonts is optional; system fonts are used if unavailable.
+Create, rename, reorder, and delete custom spaces. Add tasks with optional class/category, dates, times, notes, priority, availability, and next actions. Calendar and list filters use your device timezone. In-app reminders are checked while the app is open. Sample relative or incomplete dates remain unscheduled until confirmed. Planner data uses `polyplan.v1` in localStorage.
 
-## Privacy and reminders
+## Internships
 
-Data is stored in this browser's localStorage. Use Settings → Export backup before clearing browser data or switching devices. Sample relative or incomplete dates are deliberately unscheduled, with the original context preserved in notes. Dates and times use the device's local timezone.
+Open **Internships** in the main navigation. Applications, Technical, Behavioral, and Online Assessments have separate table tabs. Use Add new to create entries, Edit to update or delete them, the search box to find records, and table headings to sort. Technical and Behavioral columns match the provided spreadsheet structure. OA includes company, notes, link, due date, and status. Tables scroll horizontally on narrow screens.
 
-In-app reminders are evaluated while the app is open. Optional SMS uses the separately running server described below. SMS remains off until configured and enabled. Never embed SMS credentials or a personal phone number in public frontend code.
+Applications track company, role, link, status, reason/next action, deadline, applied date, and notes. “Saved for later” requires a short reason. Check Applied only after you have submitted on the employer's site. It records the current local date; you can edit historical dates. Interviewing/Offer/Rejected statuses retain an existing applied date. Opening or autofilling a form does **not** mark it as submitted. There are no invented application-history rows.
+
+The entry form's **Read company & role from link** button uses public metadata from standard Greenhouse (`job-boards.greenhouse.io` or `boards.greenhouse.io`) and Lever (`jobs.lever.co`) links. Company board slugs may need correcting. It never overwrites company/role text you already entered. Other links, unavailable listings, and CORS/network restrictions fall back to manual entry. No employer account, private page, or login is scraped. Real external listings have not been validated without user-provided target links.
+
+## Application autofill
+
+A website cannot fill forms on a different website. The included Chrome/Edge extension performs review-first autofill from your saved profile on the application tab you choose. See [extension/README.md](extension/README.md) for installation and limits. A native Safari build is not included.
+
+1. In Internships → My profile, enter your information and any exact questions/answers you approve.
+2. Save, then download the private autofill profile. Never commit it or share it publicly.
+3. Load the `extension` folder in your browser's developer extension screen and import the profile there.
+4. Optionally select your résumé PDF/Word file in the extension. PolyPlan does not parse it, upload it to a server, or invent facts from it.
+5. Open an employer application, scan, review proposed matches, and fill selected fields. Review the actual form and submit manually. Repeat for each application page.
+
+This is a working common-field helper, **not universal end-to-end auto-apply**. It supports labeled standard fields, exact native dropdown matches, exact approved custom answers, and clearly labeled résumé uploads. Login, CAPTCHA, screening questions without approved answers, consents, demographic fields, custom widgets, repeated work-history blocks, and some embedded forms remain manual. No AI service or credentials are required.
+
+To personalize the profile, gather your résumé, name/contact details, city and address as needed, LinkedIn/GitHub/portfolio links, school/degree/major and graduation date, and your own verified answers to work-authorization/sponsorship, availability, and relocation questions. Do not put passwords, SSN, or identity documents into the profile. Employer-specific eligibility and essay answers must be reviewed separately. Representative application links and your browser are needed to validate real-site coverage.
+
+## Storage and backups
+
+Planner tasks and the internship workspace use separate local browser storage keys (`polyplan.v1` and `polyplan.career.v1`). Planner Settings exports/imports planner data; Internships → Backup/Restore includes application tables, interview notes, and your application profile. Restore replaces only its corresponding workspace after confirmation. Back up **both** before changing devices or clearing browser data. A Git pull updates app code, not your personal browser data. The extension keeps a separate local profile/résumé copy; reimport after editing your profile. These files contain personal information. Exported private files are ignored by Git via filename patterns.
+
+If an old SMS server is still running from an earlier version, stop its terminal with Control+C and disable its host service. Removing this UI does not stop a separately deployed old server. Do not delete private `.env` or server data without keeping any backup you need.
 
 ## Validation
 
-Production build and Chromium interaction checks passed: task creation with date/time, reload persistence, completion, reopening, deletion, SMS status, and mobile horizontal-overflow check.
-
-## SMS connection (Twilio)
-
-The app now includes a single-user SMS backend. No SMS is sent until you configure it and explicitly opt in. Node.js **22.13+** is required (Node 24 LTS recommended; SQLite is built into Node).
-
-1. Create a Twilio account and obtain an SMS-capable sender number. Trial accounts generally require verifying the recipient. US sending may require toll-free verification or A2P registration; follow the Twilio console requirements. Twilio charges for numbers and messages.
-2. Copy `.env.example` to `.env`. Enter your Account SID, Auth Token, sender, and your recipient number privately in that file. Use international `+countrycode` formatting. Generate `POLYPLAN_ACCESS_TOKEN` with `openssl rand -hex 32`. Never commit `.env`, share the token publicly, or prefix credentials with `VITE_`.
-3. In one terminal, run `npm run server`. In another, run `npm run dev`.
-4. Open Settings & reminders in PolyPlan. Paste the private connection key (not your Twilio Auth Token), check the connection, review the consent text, and enable reminders. The connection key lasts for this browser tab's session. It grants access to your personal scheduler: keep it private.
-5. Add a task with a future date and time. A project defaults to 3 days before; homework to 1 day. Choose “On the due date” for a near-future test. After syncing, the server checks every 15 seconds. Provider acceptance is displayed separately from actual delivery. Check Twilio's console for delivery failures and opt-outs.
-
-Only titles and computed reminder timestamps are synced; notes and your full workspace remain in the browser. Sync replaces the active server schedule. Use one browser as the scheduling source; other browsers are not a multi-device task sync. Editing/completing/deleting items updates the server while connected. If the key expires from your browser session, reconnect before editing schedules. The last successfully synced schedule remains active until disabled, even with the website closed. Failed syncs show a warning. Imported backups update that schedule when connected.
-
-Date-only tasks remind at **9 AM in your device timezone**; date/time tasks use the entered local time, minus the chosen number of calendar days. The server receives an absolute timestamp. Past reminders on first sync are skipped. Outages longer than an hour skip missed reminders. Each task/time pair is claimed once; ambiguous provider failures are not automatically retried, to avoid duplicate texts. Check the provider console before rescheduling an unconfirmed reminder. Cancelled/completed tasks are removed from pending sends after a successful sync. A send already in progress cannot be recalled. Reply STOP to opt out through Twilio, and use “Turn off text reminders” to cancel pending schedules.
-
-### Keeping SMS running online
-
-Your laptop must stay awake with `npm run server` running for local reminders. To work while your laptop is closed, deploy the server to an **always-on Node host with a persistent disk** for `server-data/`. Put both the website and `/api/` behind the same HTTPS origin; proxy `/api/` to the backend on port 3001, and serve the built `dist/` files. Set `APP_ORIGIN` to that exact public HTTPS origin. Keep the backend bound to loopback behind the reverse proxy. Supply `.env` values through your host's secure environment settings and run only one scheduler instance. Do not use ephemeral/serverless storage for this implementation. Back up the database privately. Node processes must be restarted after a host reboot; configure the host's restart policy. A static website deployment alone does not run the SMS scheduler.
-
-Run `npm test` for schedule validation and mocked Twilio request/error tests. No real messages are sent by tests. Live SMS delivery has not been validated without provider credentials.
+`npm test` covers career-backup validation and supported listing URL parsing. `npm run build` checks the production bundle. Chromium interaction tests cover internship CRUD, saved reasons, application checkmarks, persistence, tables, profile export, and responsive overflow. Autofill tests use a local synthetic employer form, never submit it, and check that unsupported/sensitive/populated inputs remain unchanged. No live employer submission is performed.
