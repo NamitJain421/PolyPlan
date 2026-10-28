@@ -27,14 +27,15 @@
         if(!resume||!labels.some(s=>/\b(resume|cv)\b/.test(s))){manual++;continue}
         const accepted=(element.accept||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
         if(accepted.length&&!accepted.some(s=>s===resume.type||s===('.'+resume.name.split('.').pop().toLowerCase())||s==='application/*')){manual++;continue}
-        plan.push({element,label,value:resume.name,file:resume});continue;
+        plan.push({element,label,value:resume.name,file:resume,kind:'profile',source:'Your selected résumé',reason:'Labeled résumé upload',selected:true});continue;
       }
       if(String(element.value||'').trim()&&(element.tagName!=='SELECT'||element.value!==''))continue;
       let key=Object.entries(aliases).find(([,names])=>labels.some(label=>names.includes(label)))?.[0];
       const autocomplete=(element.autocomplete||'').split(' ').at(-1);
       if(!key&&auto[autocomplete])key=auto[autocomplete];
+      let explanation={kind:'profile',source:key?`My profile → ${key}`:'',reason:'Saved profile field'};
       let value=key==='fullName'?[profile.firstName,profile.lastName].filter(Boolean).join(' '):profile[key];
-      if(!value){const exact=answers.find(a=>labels.includes(normalize(a.question)));if(exact)value=exact.answer}
+      if(!value){const result=globalThis.PolyPlanQuestionMatcher?.match(label,answers,profile);if(result){value=result.value;explanation={kind:result.kind,source:result.source,reason:result.reason}}}
       if(!value){manual++;continue}
       if(element.tagName==='SELECT'){
         const option=[...element.options].find(o=>!o.disabled&&(normalize(o.textContent)===normalize(value)||normalize(o.value)===normalize(value)));
@@ -42,9 +43,9 @@
       }
       if(element.maxLength>0&&value.length>element.maxLength){manual++;continue}
       if(element.type==='number'&&(!Number.isFinite(Number(value))||(element.min!==''&&Number(value)<Number(element.min))||(element.max!==''&&Number(value)>Number(element.max)))){manual++;continue}
-      plan.push({element,label,value:String(value)});
+      plan.push({element,label,value:String(value),...explanation,selected:explanation.kind!=='similar'});
     }
-    return {matches:plan.map((p,index)=>({index,label:p.label,value:p.file?`Attach ${p.value}`:p.value})),manual,embedded:document.querySelectorAll('iframe').length};
+    return {matches:plan.map((p,index)=>({index,label:p.label,value:p.file?`Attach ${p.value}`:p.value,kind:p.kind,source:p.source,reason:p.reason,selected:p.selected})),manual,embedded:document.querySelectorAll('iframe').length};
   }
   function fill(indices){let filled=0,skipped=0;
     for(const index of indices){const item=plan[index];if(!item){skipped++;continue}const {element}=item;

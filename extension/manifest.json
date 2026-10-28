@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PolyPlan Application Helper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Review and fill known application fields with your saved profile. Never submits applications.",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {"default_popup": "popup.html", "default_title": "PolyPlan — review & fill"}

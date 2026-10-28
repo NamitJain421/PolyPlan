@@ -29,13 +29,13 @@ The entry form's **Read company & role from link** button uses public metadata f
 
 A website cannot fill forms on a different website. The included Chrome/Edge extension performs review-first autofill from your saved profile on the application tab you choose. See [extension/README.md](extension/README.md) for installation and limits. A native Safari build is not included.
 
-1. In Internships → My profile, enter your information and any exact questions/answers you approve.
+1. In Internships → My profile, enter your information and questions in your own words and answers you approve.
 2. Save, then download the private autofill profile. Never commit it or share it publicly.
 3. Load the `extension` folder in your browser's developer extension screen and import the profile there.
 4. Optionally select your résumé PDF/Word file in the extension. PolyPlan does not parse it, upload it to a server, or invent facts from it.
 5. Open an employer application, scan, review proposed matches, and fill selected fields. Review the actual form and submit manually. Repeat for each application page.
 
-This is a working common-field helper, **not universal end-to-end auto-apply**. It supports labeled standard fields, exact native dropdown matches, exact approved custom answers, and clearly labeled résumé uploads. Login, CAPTCHA, screening questions without approved answers, consents, demographic fields, custom widgets, repeated work-history blocks, and some embedded forms remain manual. No AI service or credentials are required.
+This is a working common-field helper, **not universal end-to-end auto-apply**. It supports labeled standard fields, exact native dropdown matches, approved answers for supported similar-meaning questions, and clearly labeled résumé uploads. Login, CAPTCHA, screening questions without approved answers, consents, demographic fields, custom widgets, repeated work-history blocks, and some embedded forms remain manual. No AI service or credentials are required.
 
 To personalize the profile, gather your résumé, name/contact details, city and address as needed, LinkedIn/GitHub/portfolio links, school/degree/major and graduation date, and your own verified answers to work-authorization/sponsorship, availability, and relocation questions. Do not put passwords, SSN, or identity documents into the profile. Employer-specific eligibility and essay answers must be reviewed separately. Representative application links and your browser are needed to validate real-site coverage.
 
@@ -72,3 +72,12 @@ npm run dev:restart
 ```
 
 The launcher identifies a server started by this launcher, or uses macOS `lsof` to verify the old Vite process's working directory and command before stopping it. It waits for the port to be released before starting. It does not terminate an unrelated service or force-kill processes. If an unrecognized service owns port 5173, the launcher gives instructions to stop it in its original terminal. It keeps the same port so saved browser data remains at the same origin. Restarting does not clear localStorage.
+
+
+## Similar-question matching
+
+The extension recognizes local, curated question intents as well as exact saved labels. For example, “how I heard about this company” matches “How did you hear about us?” and “Where did you find this job?” It reuses your actual saved answer; it does not generate a new one. Supported types include referral source, referrer name (separate from source), motivation for company versus role, start versus end dates, school, major, degree, graduation month/year, profile links, contact details, personal introductions, and programming-language lists. This is rules-based matching, not a general-purpose AI language model; unrecognized wording remains manual.
+
+In My profile, use **Try an application question** to preview how a question matches your current answers. In the extension, suggestions show the matched saved question and the matching reason. Similar-meaning suggestions start **unchecked**; select them after reviewing. Exact saved questions and direct profile field matches can remain checked. Conflicting saved answers, multi-part questions, unfamiliar wording, and unsupported dropdown options stay blank. Work authorization, sponsorship, salary/pay, relocation, and other consequential questions require an exact saved label. Existing protected demographic/consent/signature fields remain excluded.
+
+After pulling this update, reload the extension in `chrome://extensions` (or Edge's equivalent). After changing your answers, download a new autofill profile from the website and import it into the extension. Both copies remain local; website changes are not automatically transmitted to the extension. No AI API key is needed, and nothing is sent to an external model.
