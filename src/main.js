@@ -1,3 +1,4 @@
+import {mountChat} from './chat.js';
 import {createStore} from './storage.js';
 import {mountCareer} from './career.js';
 const key='polyplan.v1';
@@ -46,3 +47,5 @@ window.addEventListener('storage',e=>{if(e.key===key)refreshPlanner()});
 window.addEventListener('pageshow',()=>refreshPlanner());
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPlanner()});
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.querySelector('#search').focus()}});render();
+
+mountChat();

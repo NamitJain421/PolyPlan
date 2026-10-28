@@ -46,3 +46,5 @@ form.onsubmit=e=>{e.preventDefault();clearTimeout(draftTimer);capture();if(persi
 function refreshCareer(){if(document.querySelector('dialog[open]')||root?.querySelector('#career-profile-form')?.contains(document.activeElement))return;state=careerStore.load();if(root?.isConnected)draw()}
 window.addEventListener('storage',e=>{if(e.key===careerKey)refreshCareer()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshCareer()});
+
+export function addAssistantOA(entry){state=careerStore.load();state.OA.push({...entry,id:crypto.randomUUID()});if(!persist())return false;if(root?.isConnected)draw();return true}
