@@ -1,4 +1,5 @@
-import {createServer} from 'vite';
+import {createServer,loadEnv} from 'vite';
+import {aiPlugin,configuration} from '../server/ai.js';
 import {execFileSync} from 'node:child_process';
 import {realpathSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
@@ -39,7 +40,7 @@ async function main(){
   for(let attempt=0;attempt<40;attempt++){await delay(100);existing=await inspect();if(!existing.occupied)break}
   if(existing.occupied){console.error('The old server has not released port 5173. Stop it in its terminal, then retry.');process.exitCode=1;return}
  }
- const server=await createServer({root,server:{host:'0.0.0.0',port:5173,strictPort:true},plugins:[{name:'polyplan-dev-status',configureServer(vite){vite.middlewares.use('/__polyplan_dev_status__',(req,res)=>{if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)){res.statusCode=403;res.end();return}res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({root,pid:process.pid}))})}}]});
+ const server=await createServer({root,server:{host:'0.0.0.0',port:5173,strictPort:true},plugins:[aiPlugin(configuration({...loadEnv('development',root,''),...process.env})),{name:'polyplan-dev-status',configureServer(vite){vite.middlewares.use('/__polyplan_dev_status__',(req,res)=>{if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)){res.statusCode=403;res.end();return}res.setHeader('Content-Type','application/json');res.setHeader('Cache-Control','no-store');res.end(JSON.stringify({root,pid:process.pid}))})}}]});
  try{await server.listen()}catch(error){await server.close();if(error.message.includes('already in use')){const current=await inspect();if(current.polyplan){console.log(`PolyPlan is already running: ${address}`);return}occupiedMessage();process.exitCode=1;return}throw error}
  console.log(`\nPolyPlan is ready. Open:\n\n  ${address}\n\nKeep this terminal open. Press Control+C to stop.\n`);
  for(const signal of ['SIGINT','SIGTERM'])process.once(signal,async()=>{await server.close();process.exit(0)});

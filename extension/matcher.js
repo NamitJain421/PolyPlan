@@ -10,7 +10,8 @@
   ['startDate','Available start date',q=>/\b(start|begin|starting|commence|earliest)\b/.test(q)&&/\b(date|when|available|availability|begin|start)\b/.test(q)&&! /\b(end|finish|hours|duration|week)\b/.test(q)],
   ['endDate','Available end date',q=>/\b(end|finish|ending)\b/.test(q)&&/\b(date|when|available|availability)\b/.test(q)&&! /\b(start|begin|hours|duration)\b/.test(q)],
   ['introduction','About you',q=>/^(tell (us|me) (a (little|bit) )?about yourself|about me|about yourself|introduce yourself|personal introduction|briefly introduce yourself)$/.test(q)],
-  ['languages','Programming languages',q=>/\b(programming|coding) languages\b/.test(q)&&! /\b(years|year|experience|project|favorite|favourite|why|best|preferred|expert)\b/.test(q)],
+  ['programmingLanguages','Programming languages',q=>/\b(programming|coding) languages\b/.test(q)&&! /\b(years|year|experience|project|favorite|favourite|why|best|preferred|expert)\b/.test(q)],
+  ['spokenLanguages','Spoken languages',q=>/\blanguages?\b/.test(q)&&! /\b(programming|coding|code|python|javascript|java|software|computer)\b/.test(q)&&/^(languages?|what languages? (do you (have|speak|know)|can you speak)|which languages? (do you speak|are you fluent in)|spoken languages?|languages? (i speak|i know|spoken))$/.test(q)],
   ['school','School',q=>/^(what |which |your |name of (the |your )?)?(school|university|college)( name| do you attend| are you attending| you attend| currently attending)?$/.test(q)],
   ['major','Major / field of study',q=>/^(what is |what s |name of )?(your )?(major|field of study|area of study|course of study)( is| at (university|college))?$/.test(q)||q==='what are you studying'],
   ['degree','Degree',q=>/^(what |which |your )?(degree|degree type)( are you pursuing| are you working toward| you are pursuing| being pursued)?$/.test(q)],
@@ -29,10 +30,10 @@
   const exact=saved.filter(a=>normalize(a.question)===q);
   if(exact.length){if(new Set(exact.map(a=>a.answer.trim())).size!==1)return null;return {value:exact[0].answer,source:exact[0].question,reason:'Exact saved question',kind:'exact'}}
   const target=intent(question);if(!target)return null;
-  const candidates=saved.filter(a=>intent(a.question)?.id===target.id);
+  const candidates=saved.filter(a=>intent(a.question)?.id===target.id&&!(target.id==='spokenLanguages'&&/\b(python|javascript|java|c\+\+|sql|typescript)\b/i.test(a.answer)));
   if(candidates.length){if(new Set(candidates.map(a=>a.answer.trim())).size!==1)return null;return {value:candidates[0].answer,source:candidates[0].question,reason:`Similar meaning: ${target.label}`,kind:'similar'}}
   const fact=profile[target.id];if(typeof fact==='string'&&fact.trim())return {value:fact,source:`My profile → ${target.label}`,reason:`Recognized field: ${target.label}`,kind:'similar'};
   return null;
  }
- globalThis.PolyPlanQuestionMatcher={normalize,intent,match};
+ globalThis.PolyPlanQuestionMatcher={normalize,intent,match,isInstruction:value=>/\b(always (say|select|choose|answer)|otherwise|fallback|if .{0,100}(available|not|else))\b/i.test(value)};
 })();

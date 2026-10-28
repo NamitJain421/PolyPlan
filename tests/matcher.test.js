@@ -34,3 +34,6 @@ test('known profile facts support longer labels and native-option value remains 
  assert.equal(match('Expected graduation year',[],{graduationYear:'2027'}).value,'2027');
  assert.equal(match('Expected graduation date',[],{graduationYear:'2027'}),null);
 });
+test('bare language topics use spoken-language facts without reusing programming answers',()=>{
+ const answers=[{question:'Languages',answer:'English. I am fluent.'}];assert.equal(match('What languages do you have?',answers).value,answers[0].answer);assert.equal(match('What programming languages do you know?',answers),null);assert.equal(match('What languages do you speak?',[{question:'Languages',answer:'Python and JavaScript'}]),null);
+});

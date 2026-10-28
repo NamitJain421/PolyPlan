@@ -21,3 +21,7 @@ Supports clearly labeled standard text inputs, textareas, native selects with ex
 Passwords, consent checkboxes, demographic questions, signatures/attestations, CAPTCHA, and date inputs are left alone. Workday custom widgets, repeated work-history blocks, cross-origin embedded forms, logins, and multi-step flows may require manual entry; scan each new page. A résumé is attached only when the field explicitly says résumé/CV and its accepted types match. The extension doesn't parse PDFs or automatically create work-history entries. Review all results: employer sites can use ambiguous labels or reject programmatic field changes.
 
 This folder loads in Chromium browsers. Safari requires a separately packaged Safari Web Extension using Apple's tooling; this is not a tested Safari build.
+
+## Model-backed matching (v1.2)
+
+Use **Ask AI about remaining questions** after scanning. PolyPlan must be running locally with a configured Ollama model or OpenAI provider. This release adds permission to connect to `http://localhost:5173` only for that backend. Reload the extension after pulling the update. Review [AI_SETUP.md](../AI_SETUP.md) for installation, privacy, and usage instructions. Requests include your saved profile/answers and eligible field labels/options, not your résumé binary or the full website. Actual provider keys never enter the extension. AI results are unchecked and show the original source/evidence. All existing field protection, no-overwrite, and no-submit behavior remains.
