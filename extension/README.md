@@ -25,3 +25,7 @@ This folder loads in Chromium browsers. Safari requires a separately packaged Sa
 ## Model-backed matching (v1.2)
 
 Use **Ask AI about remaining questions** after scanning. PolyPlan must be running locally with a configured Ollama model or OpenAI provider. This release adds permission to connect to `http://localhost:5173` only for that backend. Reload the extension after pulling the update. Review [AI_SETUP.md](../AI_SETUP.md) for installation, privacy, and usage instructions. Requests include your saved profile/answers and eligible field labels/options, not your résumé binary or the full website. Actual provider keys never enter the extension. AI results are unchecked and show the original source/evidence. All existing field protection, no-overwrite, and no-submit behavior remains.
+
+## Two résumés
+
+Save up to two PDF or Word résumés, each up to 3 MB, in the extension. Choose résumé 1, résumé 2, or None before scanning each application. The scan shows the selected filename for review; only that file is offered for a résumé upload. Changing the selection or replacing/removing a file clears the current scan, so scan again. Your earlier single saved résumé is migrated to résumé 1 when the extension opens. Remove either file individually, or clear the entire extension profile and both files. These files stay in this browser's extension storage; they are not included in PolyPlan's website backups.
