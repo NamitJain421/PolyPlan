@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PolyPlan Application Helper",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Review and fill known application fields with your saved profile. Never submits applications.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": ["http://localhost:5173/*"],

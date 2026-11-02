@@ -17,7 +17,7 @@ $('scan').onclick=async()=>{
  try{await migrateResume();const {profile,answers=[],resume1,resume2,resumeChoice}=await chrome.storage.local.get(['profile','answers','resume1','resume2','resumeChoice']);const choice=$('resume-choice').value;const resume=choice==='1'?resume1:choice==='2'?resume2:undefined;if(!profile)throw Error('Import your profile first.');const [tab]=await chrome.tabs.query({active:true,currentWindow:true});if(!tab?.id||!/^https?:\/\//.test(tab.url||''))throw Error('Open an application on an HTTP or HTTPS website first.');currentTab=tab.id;
  await chrome.scripting.executeScript({target:{tabId:currentTab},files:['matcher.js','fill.js']});
  const [{result}]=await chrome.scripting.executeScript({target:{tabId:currentTab},func:(p,a,r)=>globalThis.polyplanApplicationHelper.scan(p,a,r),args:[profile,answers,resume]});
- $('status').textContent=`${result.matches.length} matches to review. ${result.manual} other empty fields need manual review.${result.embedded?' This page has embedded frames; open the application directly if its fields are missing.':''} Similar-meaning suggestions start unchecked; review and select them. Nothing has been filled yet.`;
+ $('status').textContent=`${result.matches.length} matches to review. ${result.manual} other empty fields need manual review. ${result.alreadyFilled||0} fields already have values and were skipped.${result.embedded?' This page has embedded frames; open the application directly if its fields are missing.':''} ${result.matches.length?'Review the suggestions before filling.':'No suggestions yet. You can try Ask AI below, or fill the remaining fields manually.'} Nothing was changed.`;
  renderMatches(result);
  }catch(error){showError(error)}finally{$('scan').disabled=false}
 };

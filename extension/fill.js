@@ -10,26 +10,27 @@
   };
   const auto={ 'given-name':'firstName','family-name':'lastName',name:'fullName',email:'email',tel:'phone','street-address':'address','address-line1':'address','address-level2':'city','address-level1':'state','postal-code':'postalCode','country-name':'country'};
   const protectedField=label=>/password|captcha|signature|attest|certify|agree|consent|race|ethnic|gender|veteran|disab|social security|ssn|date of birth/.test(label);
-  let plan=[],aiFields=[],manualCount=0;
+  let plan=[],aiFields=[],manualCount=0,alreadyFilled=0;
   function scan(profile,answers,resume){
-    plan=[];aiFields=[];let manual=0;
+    plan=[];aiFields=[];alreadyFilled=0;let manual=0;
     const fields=[...document.querySelectorAll('input,textarea,select')];
     for(const element of fields){
       if(!element.getClientRects().length||element.disabled||element.readOnly||['hidden','submit','button','reset','password','checkbox','radio','date'].includes(element.type))continue;
       const visibleLabels=[...(element.labels||[])].map(x=>x.innerText.replace(/\*/g,'').trim());
       const referenced=(element.getAttribute('aria-labelledby')||'').split(/\s+/).map(id=>document.getElementById(id)?.innerText||'').join(' ');
-      const raw=[...visibleLabels,element.getAttribute('aria-label'),referenced,element.name,element.id].filter(Boolean);
-      const labels=raw.map(normalize).map(s=>s.replace(/\b(required|optional)\b/g,'').trim());
-      const label=visibleLabels[0]||element.getAttribute('aria-label')||referenced||element.name||element.id||'Unlabeled field';
+      const placeholder=element.getAttribute('placeholder')||'';
+      const raw=[...visibleLabels,element.getAttribute('aria-label'),referenced,element.name,element.id,placeholder].filter(Boolean);
+      const labels=raw.map(normalize).map(s=>s.replace(/\b(required|optional)\b/g,'').replace(/^(please )?(enter|provide|type) (your |the )?/, '').trim());
+      const label=visibleLabels[0]||element.getAttribute('aria-label')||referenced||placeholder||element.name||element.id||'Unlabeled field';
       if(raw.some(s=>protectedField(normalize(s))))continue;
       if(element.type==='file'){
-        if(element.files?.length)continue;
+        if(element.files?.length){alreadyFilled++;continue}
         if(!resume||!labels.some(s=>/\b(resume|cv)\b/.test(s))){manual++;continue}
         const accepted=(element.accept||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
         if(accepted.length&&!accepted.some(s=>s===resume.type||s===('.'+resume.name.split('.').pop().toLowerCase())||s==='application/*')){manual++;continue}
         plan.push({element,label,value:resume.name,file:resume,kind:'profile',source:'Your selected résumé',reason:'Labeled résumé upload',selected:true});continue;
       }
-      if(String(element.value||'').trim()&&(element.tagName!=='SELECT'||element.value!==''))continue;
+      if(String(element.value||'').trim()&&(element.tagName!=='SELECT'||element.value!=='')){alreadyFilled++;continue}
       aiFields.push({id:`field:${aiFields.length}`,element,label,options:element.tagName==='SELECT'?[...element.options].filter(o=>!o.disabled&&o.value!=='').map(o=>o.textContent.trim()):[]});
       let key=Object.entries(aliases).find(([,names])=>labels.some(label=>names.includes(label)))?.[0];
       const autocomplete=(element.autocomplete||'').split(' ').at(-1);
@@ -48,7 +49,7 @@
     }
     manualCount=manual;return summary();
   }
-  function summary(){return {matches:plan.map((p,index)=>({index,label:p.label,value:p.file?`Attach ${p.value}`:p.value,kind:p.kind,source:p.source,reason:p.reason,selected:p.selected,evidence:p.evidence})),manual:manualCount,embedded:document.querySelectorAll('iframe').length,aiCount:getAIQuestions().length}}
+  function summary(){return {matches:plan.map((p,index)=>({index,label:p.label,value:p.file?`Attach ${p.value}`:p.value,kind:p.kind,source:p.source,reason:p.reason,selected:p.selected,evidence:p.evidence})),manual:manualCount,alreadyFilled,embedded:document.querySelectorAll('iframe').length,aiCount:getAIQuestions().length}}
   function getAIQuestions(){return aiFields.filter(f=>!plan.some(p=>p.element===f.element&&['profile','exact','ai'].includes(p.kind))).slice(0,30).map(({id,label,options})=>({id,label,options}))}
   function addAI(suggestions){for(const suggestion of suggestions){const field=aiFields.find(f=>f.id===suggestion.fieldId);if(!field||typeof suggestion.value!=='string'||!field.element.isConnected||field.element.value)continue;let value=suggestion.value;
    if(field.element.tagName==='SELECT'){const option=[...field.element.options].find(o=>!o.disabled&&o.textContent.trim()===value);if(!option)continue;value=option.value}
